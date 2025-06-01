@@ -1,66 +1,41 @@
 'use client';
-
 import { useEffect, useState } from 'react';
 
 interface Product {
-    Id: number;
-    Name: string;
-    Price: number;
+    id: number;
+    name: string;
+    price: number;
 }
 
 export default function Products() {
     const [products, setProducts] = useState<Product[]>([]);
-    const [loading, setLoading] = useState<boolean>(true);
-    const [token, setToken] = useState<string | null>(null);
-
-    useEffect(() => { // Authenticate the user and get the tok
-        const authenticate = async () => {
-            try {
-                const response = await fetch('https://localhost:5001/api/authenticate', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ username: 'user', password: 'password' })
-                });
-                const data = await response.json();
-                setToken(data.token);
-            } catch (error) {
-                console.error('Error authenticating:', error);
-            }
-        };
-        authenticate();
-    }, []);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        if (!token) return;
+        const token = localStorage.getItem('token');
 
-        const fetchProducts = async () => {
-            try {
-                const response = await fetch('https://localhost:5001/api/products', {
-                    headers: {
-                        Authorization: `Bearer ${token}`
-                    }
-                });
-                const data = await response.json();
-                setProducts(data);
-            } catch (error) {
-                console.error('Error fetching products:', error);
-            } finally {
-                setLoading(false);
+        fetch('http://localhost:5001/api/products', {
+            headers: {
+                Authorization: `Bearer ${token}`
             }
-        };
-        fetchProducts();
-    }, [token]);
+        })
+            .then(res => {
+                if (!res.ok) throw new Error("Não autorizado");
+                return res.json();
+            })
+            .then(data => setProducts(data))
+            .catch(() => alert("Token inválido ou expirado"))
+            .finally(() => setLoading(false));
+    }, []);
 
-    if (loading) return <p>Loading...</p>;
+    if (loading) return <p>Carregando...</p>;
 
     return (
         <div>
-            <h1>Products List</h1>
+            <h1>Produtos</h1>
             <ul>
-                {products.map((product) => (
-                    <li key={product.Id}>{product.Name} - ${product.Price}</li>
+                {products.map(p => (
+                    <li key={p.id}>{p.name} - R$ {p.price}</li>
                 ))}
             </ul>
         </div>

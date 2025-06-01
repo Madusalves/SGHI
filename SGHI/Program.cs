@@ -2,51 +2,39 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
-
-
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-builder.Services.AddControllersWithViews();
-// Register the JWT authentication service
+builder.Services.AddCors();
+builder.Services.AddControllers();
+
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options =>
-    {
+    .AddJwtBearer(options => {
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateIssuer = true,
             ValidateAudience = true,
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
-            ValidIssuer = "yourissuer",
-            ValidAudience = "youraudience",
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("your_secret_key"))
+            ValidIssuer = "meuapp",
+            ValidAudience = "meuapp_frontend",
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("super_chave_secreta_123"))
         };
     });
 
-builder.Services.AddControllers();
+builder.Services.AddAuthorization();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-app.UseAuthentication();
-// Configure the HTTP request pipeline.
-if (!app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment())
 {
-    app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
-    app.UseHsts();
+    app.UseDeveloperExceptionPage();
 }
 
-app.UseHttpsRedirection();
-app.UseStaticFiles();
 
-app.UseRouting();
 
+app.UseCors(x => x.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
+app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapControllerRoute(
-    name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
-
+app.MapControllers();
 app.Run();

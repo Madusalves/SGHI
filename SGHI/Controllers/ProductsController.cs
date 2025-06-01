@@ -1,25 +1,19 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-
-namespace SGHI.Controllers
+[ApiController]
+[Route("api/[controller]")]
+public class ProductsController : ControllerBase
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class ProductsController : ControllerBase
+    [Authorize]
+    [HttpGet]
+    public IActionResult GetProducts()
     {
-        // This endpoint is protected by JWT authentication
-        [Authorize]
-        [HttpGet]
-        public IActionResult GetProducts()
-        {
-            var products = new[]
-            {
-                new { Id = 1, Name = "Laptop", Price = 1200 },
-                new { Id = 2, Name = "Phone", Price = 800 },
-                new { Id = 3, Name = "Tablet", Price = 600 }
-            };
-            return Ok(products);
-        }
+        var products = new[] {
+            new { Id = 1, Name = "Produto A", Price = 10 },
+            new { Id = 2, Name = "Produto B", Price = 20 },
+        };
+
+        return Ok(products);
     }
 }
