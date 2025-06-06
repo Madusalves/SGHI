@@ -1,40 +1,48 @@
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.IdentityModel.Tokens;
-using System.Text;
-
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddCors();
-builder.Services.AddControllers();
-
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options => {
-        options.TokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateIssuer = true,
-            ValidateAudience = true,
-            ValidateLifetime = true,
-            ValidateIssuerSigningKey = true,
-            ValidIssuer = "meuapp",
-            ValidAudience = "meuapp_frontend",
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("super_chave_secreta_123"))
-        };
+// Add services to the container.
+builder.Services.AddControllers(); // Para API (se tiver views, use AddControllersWithViews)
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
+    {
+        Title = "Minha API",
+        Version = "v1",
+        Description = "Documentação da minha API Web"
     });
-
-builder.Services.AddAuthorization();
+});
 
 var app = builder.Build();
 
-if (app.Environment.IsDevelopment())
+if (!app.Environment.IsDevelopment())
 {
-    app.UseDeveloperExceptionPage();
+    app.UseExceptionHandler("/Home/Error");
+    app.UseHsts();
 }
 
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "Minha API v1");
+        c.RoutePrefix = string.Empty; // Serve Swagger UI na raiz (ex: https://localhost:5001/)
+    });
+}
 
+app.UseHttpsRedirection();
+app.UseStaticFiles();
 
-app.UseCors(x => x.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
-app.UseAuthentication();
+app.UseRouting();
+
 app.UseAuthorization();
 
+// Se for API:
 app.MapControllers();
+
+// Se tiver controllers MVC com views, poderia usar MapControllerRoute()
+// app.MapControllerRoute(
+//    name: "default",
+//    pattern: "{controller=Home}/{action=Index}/{id?}");
+
 app.Run();
