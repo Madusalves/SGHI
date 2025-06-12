@@ -1,8 +1,7 @@
-using Backend.Models;
 using Backend.DTO;
+using Backend.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Backend.DTO;
 
 namespace Backend.Controllers
 {
@@ -20,7 +19,7 @@ namespace Backend.Controllers
         }
 
         [HttpPost("register")]
-        public async Task<IActionResult> Register([FromBody] RegisterRequest request)
+        public async Task<IActionResult> Register([FromBody] SignUpRequest request)
         {
             var user = new LoginModel
             {
@@ -38,7 +37,7 @@ namespace Backend.Controllers
         }
 
         [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] LoginRequest request)
+        public async Task<IActionResult> Login([FromBody] DtoLoginRequest request)
         {
             var result = await _signInManager.PasswordSignInAsync(
                 request.UserName, request.Password, isPersistent: false, lockoutOnFailure: false);

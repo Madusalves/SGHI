@@ -24,7 +24,7 @@ namespace Backend.Controllers
             {
                 return BadRequest(ModelState);
             }
-
+            
             var pacient = new RegisterPacient
             {
                 Name = model.Name,
